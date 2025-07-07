@@ -1,3 +1,4 @@
+// SecurityConfig.java - CORS CORRETTO
 package com.loantech.app.config;
 
 import org.springframework.context.annotation.Bean;
@@ -22,32 +23,20 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // Disabilita CSRF per API REST
                 .csrf(csrf -> csrf.disable())
+
+                // Configura CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+
+                // Configura sessioni stateless
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .authorizeHttpRequests(authz -> authz
-                        // Permetti tutte le richieste di autenticazione
-                        .requestMatchers("/api/auth/**").permitAll()
 
-                        // Permetti endpoint pubblici
-                        .requestMatchers("/api/public/**").permitAll()
+                // Permetti TUTTE le richieste
+                .authorizeHttpRequests(auth -> auth.anyRequest().permitAll())
 
-                        // Permetti console H2 per sviluppo
-                        .requestMatchers("/h2-console/**").permitAll()
-
-                        // Permetti endpoint di health check
-                        .requestMatchers("/actuator/**").permitAll()
-
-                        // Permetti pagine di errore
-                        .requestMatchers("/error").permitAll()
-
-                        // PER ORA: Permetti TUTTE le richieste API per il testing
-                        .requestMatchers("/api/**").permitAll()
-
-                        // Tutte le altre richieste richiedono autenticazione
-                        .anyRequest().authenticated()
-                )
-                .headers(headers -> headers.frameOptions().disable()); // Per H2 Console
+                // Disabilita frame options per H2 Console
+                .headers(headers -> headers.frameOptions().disable());
 
         return http.build();
     }
@@ -61,19 +50,19 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        // Permetti tutte le origini per sviluppo
-        configuration.setAllowedOriginPatterns(List.of("*"));
+        // USA allowedOriginPatterns invece di allowedOrigins
+        configuration.setAllowedOriginPatterns(Arrays.asList("*"));
 
-        // Permetti tutti i metodi HTTP
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        // Metodi HTTP permessi
+        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"));
 
-        // Permetti tutti gli header
-        configuration.setAllowedHeaders(List.of("*"));
+        // Header permessi
+        configuration.setAllowedHeaders(Arrays.asList("*"));
 
-        // Permetti credenziali
-        configuration.setAllowCredentials(true);
+        // IMPORTANTE: Disabilita credentials per evitare conflitto
+        configuration.setAllowCredentials(false);
 
-        // Configura per tutti i path
+        // Applica a tutti i path
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
 
