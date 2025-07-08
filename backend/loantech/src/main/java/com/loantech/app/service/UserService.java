@@ -3,6 +3,7 @@ package com.loantech.app.service;
 import com.loantech.app.dto.LoginRequest;
 import com.loantech.app.dto.RegisterRequest;
 import com.loantech.app.entity.CreditScore;
+import com.loantech.app.entity.Loan;
 import com.loantech.app.entity.User;
 import com.loantech.app.repository.CreditScoreRepository;
 import com.loantech.app.repository.LoanApplicationRepository;

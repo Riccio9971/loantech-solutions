@@ -11,6 +11,7 @@ import LoanApplication from './components/LoanApplication';
 import LoanSimulator from './components/LoanSimulator';
 import LoanDetails from './components/LoanDetails';
 import MyLoans from './components/MyLoans';
+import AdminDashboard from './components/AdminDashboard';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -78,6 +79,7 @@ function App() {
               path="/loans/:loanId"
               element={user ? <LoanDetails user={user} /> : <Navigate to="/login" />}
             />
+            <Route path="/admin" element={<AdminDashboard />} />
             <Route
               path="/"
               element={user ? <Navigate to="/dashboard" /> : <Navigate to="/login" />}
