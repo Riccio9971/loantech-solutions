@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.validation.Valid;
@@ -27,6 +28,9 @@ public class AuthController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest request) {
@@ -57,5 +61,37 @@ public class AuthController {
     @GetMapping("/test")
     public ResponseEntity<ApiResponse> test() {
         return ResponseEntity.ok(new ApiResponse(true, "API Auth funziona correttamente!", null));
+    }
+
+    // ENDPOINT TEMPORANEO PER GENERARE HASH CORRETTO
+    @PostMapping("/generate-hash")
+    public ResponseEntity<ApiResponse> generateHash(@RequestBody String password) {
+        try {
+            String hash = passwordEncoder.encode(password);
+            logger.info("Hash generato per password '{}': {}", password, hash);
+
+            // Test immediato del hash generato
+            boolean testMatch = passwordEncoder.matches(password, hash);
+            logger.info("Test match del hash generato: {}", testMatch);
+
+            return ResponseEntity.ok(new ApiResponse(true, "Hash generato: " + hash, hash));
+        } catch (Exception e) {
+            logger.error("Errore durante la generazione hash: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage(), null));
+        }
+    }
+
+    // ENDPOINT TEMPORANEO PER TESTARE HASH ESISTENTE
+    @PostMapping("/test-hash")
+    public ResponseEntity<ApiResponse> testHash(@RequestParam String password, @RequestParam String hash) {
+        try {
+            boolean matches = passwordEncoder.matches(password, hash);
+            logger.info("Test hash - Password: '{}', Hash: '{}', Match: {}", password, hash, matches);
+
+            return ResponseEntity.ok(new ApiResponse(true, "Test completato. Match: " + matches, matches));
+        } catch (Exception e) {
+            logger.error("Errore durante il test hash: {}", e.getMessage());
+            return ResponseEntity.badRequest().body(new ApiResponse(false, e.getMessage(), null));
+        }
     }
 }
